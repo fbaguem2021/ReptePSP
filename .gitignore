@@ -18,6 +18,8 @@
 *.tar.gz
 *.rar
 
+# JetBrains files
+*/.idea/
 # build folders
 */build/
 */out/
