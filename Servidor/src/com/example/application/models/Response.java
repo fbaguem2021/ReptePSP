@@ -1,6 +1,8 @@
 package com.example.application.models;
 
 import java.io.Serializable;
+import com.example.application.models.Actions;
+import com.example.application.models.User;
 
 public class Response implements Serializable {
     public final Actions action;
