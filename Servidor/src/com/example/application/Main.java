@@ -23,6 +23,7 @@ public class Main {
     public static final String FILE_ESPECTACLEs  = "files"+ File.separator+"espectacles.txt";
 
     public static void main(String[] args) {
+        
         int i = 0;
         while(true) {
             final MySocket socket = new MySocket(5000+i);
@@ -37,6 +38,7 @@ public class Main {
             i++;
         }
     }
+    // metode que llença el thread amb una nova conexió
     public static void lunchThread(MySocket socket) {
         new MyThread().startThread( () -> {
             try {
@@ -97,7 +99,17 @@ public class Main {
                         socket.send((Object) new Response(Actions.USUARIO_MODIFICAR_INCORRECTO, "Ha ocurrido un erroer al intentar crear un usuario\n Vuelve a intentar"));
                     }
                 }
-                case ENTRADAS_VER_ESTADO -> {}
+                case ENTRADAS_VER_ESTADO -> {
+                    Response res = new Response();
+                    res.espectaculos = getEspectaculos();
+                    if (res.espectaculos != null) {
+                        res.action = Actions.ENTRADAS_MOSTRAR_ESTADO;
+                        socket.send((Object) res);
+                    } else {
+                        res.message = "Ha ocurrido un error al buscar los espectaculos\n Vuelve a intentar";
+                        socket.send((Object) res);
+                    }
+                }
                 case ENTRADAS_ANULAR_MOSTRAR_DISPONIBLES -> {}
                 case ENTRADAS_ANULAR_INTENTO -> {}
                 case ENTRADAS_RESERVAR_MOSTRAR_DISPONIBLES -> {}
@@ -109,6 +121,7 @@ public class Main {
             }
         } while (sortir);
     }
+    // COmprova que les dades intrduides coincideixin amb les del administrador
     public static boolean checkAdmin(User usr) {
         String cadena = getAdmin();
         User admin = new User();
@@ -116,6 +129,7 @@ public class Main {
         admin.password = cadena.split(":")[2];
         return admin.equals(usr.userName) && BCrypt.checkpw(usr.password, admin.password);
     }
+    // Comprova si hi ha un usuario amb el nom d'usuari introduit
     public static User checkUser(User user) {
         ArrayList<String> usuarios;
         usuarios = getUsers();
@@ -134,7 +148,20 @@ public class Main {
         }
         return usr;
     }
-
+    // Metode per a obtenir tots els espectacles
+    public static ArrayList<String> getEspectaculos() {
+        ArrayList<String> espectaculos = null;
+        try {
+            FileManager.Reader reader = FileManager.getReader(FILE_ESPECTACLEs);
+            reader.start();
+            espectaculos = reader.readAll();
+            reader.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return espectaculos;
+    }
+    // Metode que afegeix un usuari al archiu
     public static void añadirCliente(User usr) throws IOException {
         FileManager.Writer writer = FileManager.getWriter(FILE_USERS);
         ArrayList<String> filecontent = getUsers();
@@ -144,6 +171,7 @@ public class Main {
         writer.writeAll(filecontent);
         writer.close();
     }
+    // metode que modifica un usuari
     public static boolean modificarUsuario(User usr) {
         boolean correct = true;
         try {
@@ -156,6 +184,7 @@ public class Main {
         }
         return correct;
     }
+    // metode que desactiva un usuari
     public static boolean desactivarUsuario(User usr) {
         ArrayList<String> usuarios = getUsers();
         int i = 0;
@@ -181,6 +210,7 @@ public class Main {
         }
         return found;
     }
+    // metode que retorna la cadena encriptada del administrador
     public static String getAdmin() {
         FileManager.Reader reader = FileManager.getReader(FILE_USERS);
         String admin = "";
@@ -193,6 +223,7 @@ public class Main {
         }
         return admin;
     }
+    // metode que retorna un arraylist amb tots els usuaris
     public static ArrayList<String> getUsers() {
         FileManager.Reader reader = FileManager.getReader(FILE_USERS);
         ArrayList<String> filecontent = new ArrayList<>();
