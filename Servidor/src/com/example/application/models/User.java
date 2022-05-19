@@ -67,10 +67,10 @@ public class User {
         return userName+':'+password;
     }
     public String getCadenaNewClient() {
-        return userName+":"+name+":"+surname+":"+email+":"+password+":"+phone+":"+tipoTarjeta+":"+tarjetaCredito;
+        return id+":"+active+":"+userName+":"+name+":"+surname+":"+email+":"+password+":"+phone+":"+tipoTarjeta+":"+tarjetaCredito;
     }
     public String getCadenaModClient() {
-        return userName+":"+name+":"+surname+":"+email+":"+password+":"+phone+":"+tipoTarjeta+":"+tarjetaCredito;
+        return id+":"+active+":"+userName+":"+name+":"+surname+":"+email+":"+password+":"+phone+":"+tipoTarjeta+":"+tarjetaCredito;
     }
     public String toString() {
         return "Usuario: \nNombre de usuario: " + userName + ", Nombre: " + name
