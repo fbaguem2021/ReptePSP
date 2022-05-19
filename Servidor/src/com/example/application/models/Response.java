@@ -12,6 +12,7 @@ public class Response implements Serializable {
     public User newUser;
     public String message;
     public ArrayList<String> espectaculos;
+    public String entrada;
     public ArrayList<String> sillas;
     public Response(){}
     public Response(Actions action) {
