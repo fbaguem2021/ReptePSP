@@ -23,15 +23,17 @@ public class Main {
     public static final String FILE_ESPECTACLEs  = "files"+ File.separator+"espectacles.txt";
 
     public static void main(String[] args) {
-        
+
         int i = 0;
         while(true) {
             final MySocket socket = new MySocket(5000+i);
             System.out.println("Esperando conexiones");
             try {
                 socket.accept();
+                System.out.println(socket.getIP());
                 System.out.println("conexión iniciada");
                 lunchThread(socket);
+                System.out.println(" - - - - - ");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -56,6 +58,7 @@ public class Main {
         do {
             Response response = (Response) socket.readObject();
             switch (response.action) {
+                // administrador intentando hacer login
                 case LOGIN_ADMIN_INTENTO -> {
                     if (checkAdmin(response.user)) {
                         socket.send((Object)
@@ -64,6 +67,7 @@ public class Main {
                         socket.send((Object) new Response(Actions.LOGIN_ADMIN_INCORRECTO, "Inicio de session incorrecto"));
                     }
                 }
+                //clioente intentando hacer login
                 case LOGIN_CLIENTE_INTENTO -> {
                     User usr = checkUser(response.user);
                     if (usr != null) {
@@ -76,6 +80,7 @@ public class Main {
                         socket.send((Object) new Response(Actions.LOGIN_CLIENTE_INCORRECTO, "No se ha encontrado el usuario"));
                     }
                 }
+                // intento de alta de un usuario
                 case USUARIO_ALTA_INTENTO -> {
                     try {
                         añadirCliente(response.user);
@@ -84,6 +89,7 @@ public class Main {
                         socket.send((Object) new Response(Actions.USUARIO_ALTA_INCORRECTO, "El usuario no se ha podido añadir de forma correcta"));
                     }
                 }
+                // intento de baja de un usuario
                 case USUARIO_BAJA_INTENTO -> {
                     User usuario = response.user;
                     if (desactivarUsuario(usuario)) {
@@ -92,6 +98,7 @@ public class Main {
                         socket.send((Object) new Response(Actions.USUARIO_BAJA_INCORRECTO, "La baja no se ha realizado correctyamente"));
                     }
                 }
+                // intento de modificación de un usuario
                 case USUARIO_MODIFICAR_INTENTO -> {
                     if (modificarUsuario(response.user)) {
                         socket.send((Object) new Response(Actions.USUARIO_MODIFICAR_CORRECTO, response.user));
@@ -99,21 +106,30 @@ public class Main {
                         socket.send((Object) new Response(Actions.USUARIO_MODIFICAR_INCORRECTO, "Ha ocurrido un erroer al intentar crear un usuario\n Vuelve a intentar"));
                     }
                 }
-                case ENTRADAS_VER_ESTADO -> {
+                // intento de obtencion de espectaculos
+                case ESPECTACULOS_OBTENER -> {
                     Response res = new Response();
                     res.espectaculos = getEspectaculos();
                     if (res.espectaculos != null) {
-                        res.action = Actions.ENTRADAS_MOSTRAR_ESTADO;
+                        res.action = Actions.ESPECTACULOS_OBTENER_CORRECTO;
                         socket.send((Object) res);
                     } else {
+                        res.action = Actions.ESPECTACULOS_OBTENER_ERROR;
                         res.message = "Ha ocurrido un error al buscar los espectaculos\n Vuelve a intentar";
                         socket.send((Object) res);
                     }
                 }
+                // intento de creacion de espectaculo
+                case ESPECTACULO_CREAR_INTENTO -> {}
+                // intento de ver las entradas que un usuario puede anular
                 case ENTRADAS_ANULAR_MOSTRAR_DISPONIBLES -> {}
+                // entento de anular una entrada
                 case ENTRADAS_ANULAR_INTENTO -> {}
+                // intento de ver las entradas que un usuario puede reservar
                 case ENTRADAS_RESERVAR_MOSTRAR_DISPONIBLES -> {}
+                // intento de un usuario de reservar entradas
                 case ENTRADAS_RESERVAR_INTENTO -> {}
+                // accion de cerrar session
                 case LOGIN_CERRAR_SESSION -> {
                     socket.send(new Response(Actions.LOGIN_CERRAR_SESSION_CORRECTO));
                     sortir = true;
