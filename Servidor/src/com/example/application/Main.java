@@ -2,11 +2,15 @@ package com.example.application;
 
 import com.example.application.classes.*;
 import static com.example.application.models.Actions.*;
+
+import com.example.application.models.Entrada;
 import com.example.application.models.Response;
 import com.example.application.models.User;
 
 import java.io.File;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -15,12 +19,14 @@ import java.util.ArrayList;
  * @author francesc
  */
 public class Main {
-    public static final String FILE_FOLDER       = "files"+ File.separator;
-    public static final String FILE_USERS        = "files"+ File.separator+"users.txt";
-    public static final String FILE_ESPECTACLES  = "files"+ File.separator+"espectacles.txt";
+    public static final String FOLDER_ESPECTACLES =
+            "src\\files"+ File.separator+"performances"+File.separator;
+    public static final String FILE_USERS =
+            "src\\files"+ File.separator+"users.txt";
+    public static final String FILE_ESPECTACLES =
+            "src\\files"+ File.separator+"espectacles.txt";
 
     public static void main(String[] args) {
-
         int i = 0;
         while(true) {
             final MySocket socket = new MySocket(5000+i);
@@ -131,14 +137,60 @@ public class Main {
                         socket.send((Object)res);
                     }
                 }
-                // intento de ver las entradas que un usuario puede anular
-                case ENTRADAS_ANULAR_MOSTRAR_DISPONIBLES -> {}
-                // entento de anular una entrada
-                case ENTRADAS_ANULAR_INTENTO -> {}
                 // intento de ver las entradas que un usuario puede reservar
-                case ENTRADAS_RESERVAR_MOSTRAR_DISPONIBLES -> {}
+                case ENTRADAS_RESERVAR_MOSTRAR_DISPONIBLES -> {
+                    User usuario = response.user;
+                    String espectaculo = response.espectaculo;
+                    ArrayList<String> sillas = getSillasNoDisponibles(usuario, espectaculo);
+                    if (sillas.size() == 0) {
+                        Response res = new Response();
+                        res.action = ENTRADAS_RESERVAR_MOSTRAR_DISPONIBLES;
+                        res.message = "Todas las sillas estan disponibles";
+                        socket.send((Object) res);
+                    } else {
+                        Response res = new Response();
+                        res.action = ENTRADAS_RESERVAR_CORRECTO;
+                        res.sillas = sillas;
+                    }
+                }
                 // intento de un usuario de reservar entradas
-                case ENTRADAS_RESERVAR_INTENTO -> {}
+                case ENTRADAS_RESERVAR_INTENTO -> {
+                    User user = response.user;
+                    Entrada entrada = response.entrada;
+                    reservarEntradas(user, entrada);
+                    Response res = new Response();
+                    res.action = ENTRADAS_RESERVAR_CORRECTO;
+                    res.message = "La entrada se ha reservado correctamente";
+                    socket.send((Object) res);
+                }
+                // intento de ver las entradas que un usuario puede anular
+                case ENTRADAS_ANULAR_MOSTRAR_DISPONIBLES -> {
+                    User user = response.user;
+                    String espectaculo = response.espectaculo;
+                    ArrayList<String> sillas = obtenerReservadas(user, espectaculo);
+                    if (sillas.size() == 0) {
+                        Response res = new Response();
+                        res.action = ENTRADAS_RESERVAR_MOSTRAR_DISPONIBLES;
+                        res.message = "No se han encontrado entradas a tu nombre";
+                        socket.send((Object) res);
+                    } else {
+                        Response res = new Response();
+                        res.action = ENTRADAS_RESERVAR_MOSTRAR_DISPONIBLES;
+                        res.sillas = sillas;
+                        socket.send((Object) res);
+                    }
+                }
+                // entento de anular una entrada
+                case ENTRADAS_ANULAR_INTENTO -> {
+                    User user = response.user;
+                    Entrada entrada = response.entrada;
+                    anularEntrada(user, entrada);
+
+                    Response res = new Response();
+                    res.action = ENTRADAS_ANULAR_CORRECTO;
+                    res.message = "Entradas anuladas correctamente";
+                    socket.send((Object) res);
+                }
                 // accion de cerrar session
                 case LOGIN_CERRAR_SESSION -> {
                     socket.send(new Response(LOGIN_CERRAR_SESSION_CORRECTO));
@@ -146,6 +198,90 @@ public class Main {
                 }
             }
         } while (sortir);
+    }
+
+    private static ArrayList<String> obtenerReservadas(User user, String espectaculo) {
+        ArrayList<String> sillas = new ArrayList<>();
+        FileManager.Reader reader = FileManager.getReader(FOLDER_ESPECTACLES+espectaculo+".txt");
+        String line;
+        try {
+            reader.start();
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(user.userName)) {
+                    sillas.add(line);
+                }
+            }
+            reader.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return sillas;
+    }
+
+    private static void anularEntrada(User user, Entrada entrada) {
+        ArrayList<String> file = getEspectaculoFile(entrada.espectaculo);
+
+        for (int i = 2; i < file.size(); i++) {
+            String silla = file.get(i);
+            if (silla.contains(entrada.fila+":"+entrada.columna) && silla.contains(user.name)) {
+                silla = entrada.fila+":"+entrada.columna+":L";
+            }
+        }
+
+        FileManager.Writer writer = FileManager.getWriter(FOLDER_ESPECTACLES+entrada.espectaculo+".txt");
+        try {
+            writer.start();
+            writer.writeAll(file);
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void reservarEntradas(User user, Entrada entrada) {
+        ArrayList<String> file = getEspectaculoFile(entrada.espectaculo);
+
+        for (int i = 2; i < file.size(); i++) {
+            String silla = file.get(i);
+            if (silla.contains(entrada.fila+":"+entrada.columna) && silla.contains(":L")) {
+                silla = entrada.fila+":"+entrada.columna+":C"+user.userName;
+            }
+        }
+
+        FileManager.Writer writer = FileManager.getWriter(FOLDER_ESPECTACLES+entrada.espectaculo+".txt");
+        try {
+            writer.start();
+            writer.writeAll(file);
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static ArrayList<String> getSillasNoDisponibles(User usuario, String espectaculo) throws IOException {
+        ArrayList<String> sillas = new ArrayList<>();
+        FileManager.Reader reader = FileManager.getReader(FOLDER_ESPECTACLES+espectaculo+".txt");
+        String line;
+        reader.start();
+        line = reader.readLine(); line = reader.readLine();
+        while ((line = reader.readLine()) != null) {
+            if (!line.contains(":L") && !line.contains(usuario.userName)) {
+                sillas.add(line);
+            }
+        }
+        return sillas;
+    }
+    private static ArrayList<String> getEspectaculoFile(String espectaculo) {
+        ArrayList<String> file = new ArrayList<>();
+        FileManager.Reader reader = FileManager.getReader(FOLDER_ESPECTACLES+espectaculo+".txt");
+        try {
+            reader.start();
+            file = reader.readAll();
+            reader.close();
+        } catch (IOException e) {
+            System.out.println(e.toString());
+        }
+        return file;
     }
     // COmprova que les dades intrduides coincideixin amb les del administrador
     public static boolean checkAdmin(User usr) {
@@ -301,7 +437,7 @@ public class Main {
     }
     // Crea el fichero para el nuevo espectaculo
     public static void crearFicheroEspectaculo(String espectaculo) {
-        FileManager.Writer writer = FileManager.getWriter(FILE_FOLDER+espectaculo+".txt");
+        FileManager.Writer writer = FileManager.getWriter(FOLDER_ESPECTACLES+espectaculo+".txt");
         try {
             writer.start();
             writer.writeLine(espectaculo);
