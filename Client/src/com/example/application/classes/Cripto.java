@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.example.application.classes;
-import com.example.application.classes.User;
+import com.example.application.models.User;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
@@ -15,6 +15,8 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
+
+import com.example.application.models.*;
 
 /**
  * Classe que conte els diferents mètodes per a l'encriptació de dades
@@ -119,6 +121,21 @@ public class Cripto {
         key = new SecretKeySpec(claveEncriptar, "AES");
         
         return key;
+    }
+
+    /**
+     * Metodo que encripta la contraseña y la tarjeta de credito de un usuario
+     * @param usr Objeto usuario
+     * @return Retorna un objeto Usuario
+     */
+    public static User encriptar(User usr) {
+        usr.password = BlowFish(usr.password);
+        usr.tarjetaCredito = AES_hash(usr.tarjetaCredito);
+        return usr;
+    }
+    public static User desencriptar(User usr) {
+        usr.tarjetaCredito = AES_unhash(usr.tarjetaCredito);
+        return usr;
     }
     /**
      * Metode que encripta l'informació d'un objecte User, i depenent de si 
