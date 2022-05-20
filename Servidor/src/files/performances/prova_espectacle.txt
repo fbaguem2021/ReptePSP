@@ -1,5 +1,4 @@
 prova espectacle
-5:5:2021_5:5
 
 1:1:C:fran
 1:2:C:fran
