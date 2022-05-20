@@ -1,15 +1,12 @@
 package com.example.application;
 
 import com.example.application.classes.*;
-import com.example.application.classes.MyThread.setOnThreadRunArgs;
-import com.example.application.models.Actions;
+import static com.example.application.models.Actions.*;
 import com.example.application.models.Response;
 import com.example.application.models.User;
-import com.sun.security.jgss.GSSUtil;
-import jdk.swing.interop.SwingInterOpUtils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -20,7 +17,7 @@ import java.util.ArrayList;
 public class Main {
     public static final String FILE_FOLDER       = "files"+ File.separator;
     public static final String FILE_USERS        = "files"+ File.separator+"users.txt";
-    public static final String FILE_ESPECTACLEs  = "files"+ File.separator+"espectacles.txt";
+    public static final String FILE_ESPECTACLES  = "files"+ File.separator+"espectacles.txt";
 
     public static void main(String[] args) {
 
@@ -62,9 +59,9 @@ public class Main {
                 case LOGIN_ADMIN_INTENTO -> {
                     if (checkAdmin(response.user)) {
                         socket.send((Object)
-                                new Response(Actions.LOGIN_ADMIN_CORRECTO, User.getAdminFromCadena(getAdmin()), "Inicio de sesion correcto"));
+                                new Response(LOGIN_ADMIN_CORRECTO, User.getAdminFromCadena(getAdmin()), "Inicio de sesion correcto"));
                     } else {
-                        socket.send((Object) new Response(Actions.LOGIN_ADMIN_INCORRECTO, "Inicio de session incorrecto"));
+                        socket.send((Object) new Response(LOGIN_ADMIN_INCORRECTO, "Inicio de session incorrecto"));
                     }
                 }
                 //clioente intentando hacer login
@@ -72,38 +69,38 @@ public class Main {
                     User usr = checkUser(response.user);
                     if (usr != null) {
                         if (BCrypt.checkpw(response.user.password, usr.password)) {
-                            socket.send((Object) new Response(Actions.LOGIN_CLIENTE_CORRECTO, usr));
+                            socket.send((Object) new Response(LOGIN_CLIENTE_CORRECTO, usr));
                         } else {
-                            socket.send((Object) new Response(Actions.LOGIN_CLIENTE_INCORRECTO, "Contraseña incorrecta"));
+                            socket.send((Object) new Response(LOGIN_CLIENTE_INCORRECTO, "Contraseña incorrecta"));
                         }
                     } else {
-                        socket.send((Object) new Response(Actions.LOGIN_CLIENTE_INCORRECTO, "No se ha encontrado el usuario"));
+                        socket.send((Object) new Response(LOGIN_CLIENTE_INCORRECTO, "No se ha encontrado el usuario"));
                     }
                 }
                 // intento de alta de un usuario
                 case USUARIO_ALTA_INTENTO -> {
                     try {
                         añadirCliente(response.user);
-                        socket.send((Object) new Response(Actions.USUARIO_ALTA_CORRECTO, "Usuario añadido correctamente"));
+                        socket.send((Object) new Response(USUARIO_ALTA_CORRECTO, "Usuario añadido correctamente"));
                     } catch (IOException ex) {
-                        socket.send((Object) new Response(Actions.USUARIO_ALTA_INCORRECTO, "El usuario no se ha podido añadir de forma correcta"));
+                        socket.send((Object) new Response(USUARIO_ALTA_INCORRECTO, "El usuario no se ha podido añadir de forma correcta"));
                     }
                 }
                 // intento de baja de un usuario
                 case USUARIO_BAJA_INTENTO -> {
                     User usuario = response.user;
                     if (desactivarUsuario(usuario)) {
-                        socket.send((Object) new Response(Actions.USUARIO_BAJA_CORRECTO, "La baja se ha realizado correctamente"));
+                        socket.send((Object) new Response(USUARIO_BAJA_CORRECTO, "La baja se ha realizado correctamente"));
                     } else {
-                        socket.send((Object) new Response(Actions.USUARIO_BAJA_INCORRECTO, "La baja no se ha realizado correctyamente"));
+                        socket.send((Object) new Response(USUARIO_BAJA_INCORRECTO, "La baja no se ha realizado correctyamente"));
                     }
                 }
                 // intento de modificación de un usuario
                 case USUARIO_MODIFICAR_INTENTO -> {
                     if (modificarUsuario(response.user)) {
-                        socket.send((Object) new Response(Actions.USUARIO_MODIFICAR_CORRECTO, response.user));
+                        socket.send((Object) new Response(USUARIO_MODIFICAR_CORRECTO, response.user));
                     } else {
-                        socket.send((Object) new Response(Actions.USUARIO_MODIFICAR_INCORRECTO, "Ha ocurrido un erroer al intentar crear un usuario\n Vuelve a intentar"));
+                        socket.send((Object) new Response(USUARIO_MODIFICAR_INCORRECTO, "Ha ocurrido un erroer al intentar crear un usuario\n Vuelve a intentar"));
                     }
                 }
                 // intento de obtencion de espectaculos
@@ -111,16 +108,29 @@ public class Main {
                     Response res = new Response();
                     res.espectaculos = getEspectaculos();
                     if (res.espectaculos != null) {
-                        res.action = Actions.ESPECTACULOS_OBTENER_CORRECTO;
+                        res.action = ESPECTACULOS_OBTENER_CORRECTO;
                         socket.send((Object) res);
                     } else {
-                        res.action = Actions.ESPECTACULOS_OBTENER_ERROR;
+                        res.action = ESPECTACULOS_OBTENER_ERROR;
                         res.message = "Ha ocurrido un error al buscar los espectaculos\n Vuelve a intentar";
                         socket.send((Object) res);
                     }
                 }
                 // intento de creacion de espectaculo
-                case ESPECTACULO_CREAR_INTENTO -> {}
+                case ESPECTACULO_CREAR_INTENTO -> {
+                    String espectacle = response.espectaculo;
+                    if (checkEspectaculo(espectacle)) {
+                        Response res = new Response();
+                        res.action = ESPECTACULO_CREAR_CORRECTO;
+                        crearEspectaculo(espectacle);
+                        socket.send((Object) res);
+                    } else {
+                        Response res = new Response();
+                        res.action = ESPECTACULO_CREAR_INCORRECTO;
+                        res.message = "El espectaculo ya existe";
+                        socket.send((Object)res);
+                    }
+                }
                 // intento de ver las entradas que un usuario puede anular
                 case ENTRADAS_ANULAR_MOSTRAR_DISPONIBLES -> {}
                 // entento de anular una entrada
@@ -131,7 +141,7 @@ public class Main {
                 case ENTRADAS_RESERVAR_INTENTO -> {}
                 // accion de cerrar session
                 case LOGIN_CERRAR_SESSION -> {
-                    socket.send(new Response(Actions.LOGIN_CERRAR_SESSION_CORRECTO));
+                    socket.send(new Response(LOGIN_CERRAR_SESSION_CORRECTO));
                     sortir = true;
                 }
             }
@@ -164,11 +174,20 @@ public class Main {
         }
         return usr;
     }
+    public static boolean checkEspectaculo(String espectaculo) {
+        boolean exists = false;
+        for (String s : getEspectaculos()) {
+            if (s.contains(espectaculo)) {
+                exists = true;
+            }
+        }
+        return exists;
+    }
     // Metode per a obtenir tots els espectacles
     public static ArrayList<String> getEspectaculos() {
         ArrayList<String> espectaculos = null;
         try {
-            FileManager.Reader reader = FileManager.getReader(FILE_ESPECTACLEs);
+            FileManager.Reader reader = FileManager.getReader(FILE_ESPECTACLES);
             reader.start();
             espectaculos = reader.readAll();
             reader.close();
@@ -252,6 +271,12 @@ public class Main {
         }
         return filecontent;
     }
+    public static void crearEspectaculo(String espectaculo) {
+        ArrayList<String> espectaculos = getEspectaculos();
+        espectaculos.add(espectaculo);
+        reescrivirEspectaculos(espectaculos);
+        crearFicheroEspectaculo(espectaculo);
+    }
     // Reescrive el archivo para actualizar los usuarios
     public static void reescrivirUsuarios(ArrayList<String> usuarios) {
         FileManager.Writer writer = FileManager.getWriter(FILE_USERS);
@@ -261,6 +286,33 @@ public class Main {
             writer.close();
         } catch (IOException e) {
             System.out.println(e.toString());
+        }
+    }
+    // Añade el nuevo espectaculo al fichero de espectaculos
+    public static void reescrivirEspectaculos(ArrayList<String> espectaculos) {
+        FileManager.Writer writer = FileManager.getWriter(FILE_ESPECTACLES);
+        try {
+            writer.start();
+            writer.writeAll(espectaculos);
+            writer.close();
+        } catch (IOException e) {
+            System.out.println(e.toString());
+        }
+    }
+    // Crea el fichero para el nuevo espectaculo
+    public static void crearFicheroEspectaculo(String espectaculo) {
+        FileManager.Writer writer = FileManager.getWriter(FILE_FOLDER+espectaculo+".txt");
+        try {
+            writer.start();
+            writer.writeLine(espectaculo);
+            for (int i = 1; i <= 10; i++) {
+                for (int j = 1; j <= 10; j++) {
+                    writer.writeLine(i+":"+j+":"+"L");
+                }
+            }
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
     // Agafa els valors del array i els torna a juntar en una cadena
