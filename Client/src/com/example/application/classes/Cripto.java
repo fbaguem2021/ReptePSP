@@ -145,8 +145,7 @@ public class Cripto {
      */
     public static User encriptarUsuario(User usr){
         String[] datos = {
-            usr.userName, usr.name, usr.surname, usr.email, usr.phone,
-            usr.tipoTarjeta, usr.tarjetaCredito
+            usr.userName, usr.name, usr.surname, usr.email, usr.phone, usr.tarjetaCredito
         };
         String[] datosEncriptados = new String[datos.length];
         String contraseñaEncriptada;
@@ -161,7 +160,7 @@ public class Cripto {
             usuario = new User(
                     datosEncriptados[0], datosEncriptados[1], datosEncriptados[2], 
                     datosEncriptados[3], contraseñaEncriptada,datosEncriptados[4],
-                    datosEncriptados[5], datosEncriptados[6]
+                    datosEncriptados[5]
             );
         }else{
             usuario = usr;
@@ -178,10 +177,9 @@ public class Cripto {
         email = AES_unhash(user.email);
         password = pssw;
         phone = AES_unhash(user.phone);
-        tipotarjeta = AES_unhash(user.tipoTarjeta);
         tarjetacredito = AES_unhash(user.tarjetaCredito);
 
-        usuario = new User(username, name, surname, email, password, phone, tipotarjeta, tarjetacredito);
+        usuario = new User(username, name, surname, email, password, phone, tarjetacredito);
         return usuario;
     }
 /* ================================= CADENAS =================================*/
@@ -199,15 +197,14 @@ public class Cripto {
      * @return Retorna un String
      */
     public static String GenerarCadenaUsuario(User usr){
-        String username, name, surname, email, password, phone, tipoTarjeta, tarjetaCredito;
+        String username, name, surname, email, password, phone, tarjetaCredito;
         username        = usr.userName;
         name            = usr.name;
         surname         = usr.surname;
         email           = usr.email;
         password        = usr.password;
         phone           = usr.phone;
-        tipoTarjeta     = usr.tipoTarjeta;
         tarjetaCredito  = usr.tarjetaCredito;
-        return username+':'+name+':'+surname+':'+email+':'+password+':'+phone+':'+tipoTarjeta+':'+tarjetaCredito;
+        return username+':'+name+':'+surname+':'+email+':'+password+':'+phone+':'+tarjetaCredito;
     }
 }
