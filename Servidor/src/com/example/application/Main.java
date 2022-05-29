@@ -86,8 +86,12 @@ public class Main {
                 // intento de alta de un usuario
                 case USUARIO_ALTA_INTENTO -> {
                     try {
-                        añadirCliente(response.user);
-                        socket.send((Object) new Response(USUARIO_ALTA_CORRECTO, "Usuario añadido correctamente"));
+                        if (checkNewUser(response.user)) {
+                            socket.send((Object) new Response(USUARIO_ALTA_INCORRECTO, "Ya existe el nombre de usuario"));
+                        } else {
+                            añadirCliente(response.user);
+                            socket.send((Object) new Response(USUARIO_ALTA_CORRECTO, "Usuario añadido correctamente"));
+                        }
                     } catch (IOException ex) {
                         socket.send((Object) new Response(USUARIO_ALTA_INCORRECTO, "El usuario no se ha podido añadir de forma correcta"));
                     }
@@ -198,6 +202,19 @@ public class Main {
                 }
             }
         } while (sortir);
+    }
+    // Comprova si l'usuari que s'esta intentant crear existeix
+    private static boolean checkNewUser(User user) {
+        ArrayList<String> users = getUsers();
+        int i = 0;
+        boolean alreadyExists = false;
+        while (i < users.size() && !alreadyExists) {
+            if ( User.getUserFromCadena(users.get(i)).userName.equals(user.userName) ) {
+                alreadyExists = true;
+            }
+            i++;
+        }
+        return alreadyExists;
     }
 
     private static ArrayList<String> obtenerReservadas(User user, String espectaculo) {
