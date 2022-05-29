@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.example.application.classes;
-import com.example.application.classes.User;
+import com.example.application.models.User;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
@@ -15,6 +15,8 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
+
+import com.example.application.models.*;
 
 /**
  * Classe que conte els diferents mètodes per a l'encriptació de dades
@@ -120,6 +122,21 @@ public class Cripto {
         
         return key;
     }
+
+    /**
+     * Metodo que encripta la contraseña y la tarjeta de credito de un usuario
+     * @param usr Objeto usuario
+     * @return Retorna un objeto Usuario
+     */
+    public static User encriptar(User usr) {
+        usr.password = BlowFish(usr.password);
+        usr.tarjetaCredito = AES_hash(usr.tarjetaCredito);
+        return usr;
+    }
+    public static User desencriptar(User usr) {
+        usr.tarjetaCredito = AES_unhash(usr.tarjetaCredito);
+        return usr;
+    }
     /**
      * Metode que encripta l'informació d'un objecte User, i depenent de si 
      * es produeix un error en el process, retornarà l'objecte encriptat o sense encriptar
@@ -128,8 +145,7 @@ public class Cripto {
      */
     public static User encriptarUsuario(User usr){
         String[] datos = {
-            usr.userName, usr.name, usr.surname, usr.email, usr.phone,
-            usr.tipoTarjeta, usr.tarjetaCredito
+            usr.userName, usr.name, usr.surname, usr.email, usr.phone, usr.tarjetaCredito
         };
         String[] datosEncriptados = new String[datos.length];
         String contraseñaEncriptada;
@@ -144,7 +160,7 @@ public class Cripto {
             usuario = new User(
                     datosEncriptados[0], datosEncriptados[1], datosEncriptados[2], 
                     datosEncriptados[3], contraseñaEncriptada,datosEncriptados[4],
-                    datosEncriptados[5], datosEncriptados[6]
+                    datosEncriptados[5]
             );
         }else{
             usuario = usr;
@@ -161,10 +177,9 @@ public class Cripto {
         email = AES_unhash(user.email);
         password = pssw;
         phone = AES_unhash(user.phone);
-        tipotarjeta = AES_unhash(user.tipoTarjeta);
         tarjetacredito = AES_unhash(user.tarjetaCredito);
 
-        usuario = new User(username, name, surname, email, password, phone, tipotarjeta, tarjetacredito);
+        usuario = new User(username, name, surname, email, password, phone, tarjetacredito);
         return usuario;
     }
 /* ================================= CADENAS =================================*/
@@ -182,15 +197,14 @@ public class Cripto {
      * @return Retorna un String
      */
     public static String GenerarCadenaUsuario(User usr){
-        String username, name, surname, email, password, phone, tipoTarjeta, tarjetaCredito;
+        String username, name, surname, email, password, phone, tarjetaCredito;
         username        = usr.userName;
         name            = usr.name;
         surname         = usr.surname;
         email           = usr.email;
         password        = usr.password;
         phone           = usr.phone;
-        tipoTarjeta     = usr.tipoTarjeta;
         tarjetaCredito  = usr.tarjetaCredito;
-        return username+':'+name+':'+surname+':'+email+':'+password+':'+phone+':'+tipoTarjeta+':'+tarjetaCredito;
+        return username+':'+name+':'+surname+':'+email+':'+password+':'+phone+':'+tarjetaCredito;
     }
 }

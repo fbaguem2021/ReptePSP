@@ -64,7 +64,7 @@ public class User {
         return userName+':'+password;
     }
     public String getCadenaNewClient() {
-        return id+":"+active+":"+userName+":"+name+":"+surname+":"+email+":"+password+":"+phone+":"+":"+tarjetaCredito;
+        return id+":"+active+":"+userName+":"+name+":"+surname+":"+email+":"+password+":"+phone+":"+tarjetaCredito;
     }
     public String getCadenaModClient() {
         return id+":"+active+":"+userName+":"+name+":"+surname+":"+email+":"+password+":"+phone+":"+tarjetaCredito;
