@@ -19,7 +19,8 @@
 *.rar
 
 # JetBrains files
-*/.idea/
+Servidor/.idea
+Client/.idea
 # build folders
 */build/
 */out/
