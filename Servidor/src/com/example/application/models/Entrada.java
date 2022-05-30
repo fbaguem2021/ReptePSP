@@ -1,6 +1,8 @@
 package com.example.application.models;
 
-public class Entrada {
+import java.io.Serializable;
+
+public class Entrada implements Serializable {
     public String espectaculo;
     public int fila;
     public int columna;

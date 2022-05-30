@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 /**
@@ -19,6 +20,7 @@ import java.util.ArrayList;
  * @author francesc
  */
 public class Main {
+    public static final void separador(){System.out.println("==================================================");}
     public static final String FOLDER_ESPECTACLES =
             "src\\files"+ File.separator+"performances"+File.separator;
     public static final String FILE_USERS =
@@ -29,18 +31,29 @@ public class Main {
     public static void main(String[] args) {
         int i = 0;
         while(true) {
-            final MySocket socket = new MySocket(5000+i);
+            final MySocket socket = new MySocket(5000);
             System.out.println("Esperando conexiones");
             try {
                 socket.accept();
                 System.out.println(socket.getIP());
                 System.out.println("conexión iniciada");
-                lunchThread(socket);
+                //lunchThread(socket);
+                lunchNormal(socket);
                 System.out.println(" - - - - - ");
+            } catch (SocketException ex) {
+                ex.printStackTrace();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                System.out.println("Ha ocurrido un error");
             }
             i++;
+        }
+    }
+    public static void lunchNormal(MySocket socket) {
+        try {
+            socketMenu(socket);
+            socket.close();
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
     // metode que llença el thread amb una nova conexió
@@ -59,10 +72,12 @@ public class Main {
     public static void socketMenu(MySocket socket) throws IOException, ClassNotFoundException {
         boolean sortir = false;
         do {
+            separador();
             Response response = (Response) socket.readObject();
             switch (response.action) {
                 // administrador intentando hacer login
                 case LOGIN_ADMIN_INTENTO -> {
+                    System.out.println("LOGIN_ADMIN_INTENTO");
                     if (checkAdmin(response.user)) {
                         socket.send((Object)
                                 new Response(LOGIN_ADMIN_CORRECTO, User.getAdminFromCadena(getAdmin()), "Inicio de sesion correcto"));
@@ -72,6 +87,7 @@ public class Main {
                 }
                 //clioente intentando hacer login
                 case LOGIN_CLIENTE_INTENTO -> {
+                    System.out.println("LOGIN_CLIENTE_INTENTO");
                     User usr = checkUser(response.user);
                     if (usr != null) {
                         if (BCrypt.checkpw(response.user.password, usr.password)) {
@@ -85,6 +101,7 @@ public class Main {
                 }
                 // intento de alta de un usuario
                 case USUARIO_ALTA_INTENTO -> {
+                    System.out.println("USUARIO_ALTA_INTENTO");
                     try {
                         if (checkNewUser(response.user)) {
                             socket.send((Object) new Response(USUARIO_ALTA_INCORRECTO, "Ya existe el nombre de usuario"));
@@ -98,6 +115,7 @@ public class Main {
                 }
                 // intento de baja de un usuario
                 case USUARIO_BAJA_INTENTO -> {
+                    System.out.println("USUARIO_BAJA_INTENTO");
                     User usuario = response.user;
                     if (desactivarUsuario(usuario)) {
                         socket.send((Object) new Response(USUARIO_BAJA_CORRECTO, "La baja se ha realizado correctamente"));
@@ -107,6 +125,7 @@ public class Main {
                 }
                 // intento de modificación de un usuario
                 case USUARIO_MODIFICAR_INTENTO -> {
+                    System.out.println("USUARIO_MODIFICAR_INTENTO");
                     if (modificarUsuario(response.user)) {
                         socket.send((Object) new Response(USUARIO_MODIFICAR_CORRECTO, response.user));
                     } else {
@@ -115,6 +134,7 @@ public class Main {
                 }
                 // intento de obtencion de espectaculos
                 case ESPECTACULOS_OBTENER -> {
+                    System.out.println("ESPECTACULOS_OBTENER");
                     Response res = new Response();
                     res.espectaculos = getEspectaculos();
                     if (res.espectaculos != null) {
@@ -128,21 +148,25 @@ public class Main {
                 }
                 // intento de creacion de espectaculo
                 case ESPECTACULO_CREAR_INTENTO -> {
+                    System.out.println("ESPECTACULO_CREAR_INTENTO");
                     String espectacle = response.espectaculo;
-                    if (checkEspectaculo(espectacle)) {
+                    if (!checkEspectaculo(espectacle)) {
                         Response res = new Response();
                         res.action = ESPECTACULO_CREAR_CORRECTO;
                         crearEspectaculo(espectacle);
                         socket.send((Object) res);
+                        System.out.println(1);
                     } else {
                         Response res = new Response();
                         res.action = ESPECTACULO_CREAR_INCORRECTO;
                         res.message = "El espectaculo ya existe";
                         socket.send((Object)res);
+                        System.out.println(2);
                     }
                 }
                 // intento de ver las entradas que un usuario puede reservar
                 case ENTRADAS_RESERVAR_MOSTRAR_DISPONIBLES -> {
+                    System.out.println("ENTRADAS_RESERVAR_MOSTRAR_DISPONIBLES");
                     User usuario = response.user;
                     String espectaculo = response.espectaculo;
                     ArrayList<String> sillas = getSillasNoDisponibles(usuario, espectaculo);
@@ -150,15 +174,18 @@ public class Main {
                         Response res = new Response();
                         res.action = ENTRADAS_RESERVAR_MOSTRAR_DISPONIBLES;
                         res.message = "Todas las sillas estan disponibles";
+                        res.sillas = sillas;
                         socket.send((Object) res);
                     } else {
                         Response res = new Response();
                         res.action = ENTRADAS_RESERVAR_CORRECTO;
                         res.sillas = sillas;
+                        socket.send((Object) res);
                     }
                 }
                 // intento de un usuario de reservar entradas
                 case ENTRADAS_RESERVAR_INTENTO -> {
+                    System.out.println("ENTRADAS_RESERVAR_INTENTO");
                     User user = response.user;
                     Entrada entrada = response.entrada;
                     reservarEntradas(user, entrada);
@@ -169,6 +196,7 @@ public class Main {
                 }
                 // intento de ver las entradas que un usuario puede anular
                 case ENTRADAS_ANULAR_MOSTRAR_DISPONIBLES -> {
+                    System.out.println("ENTRADAS_ANULAR_MOSTRAR_DISPONIBLES");
                     User user = response.user;
                     String espectaculo = response.espectaculo;
                     ArrayList<String> sillas = obtenerReservadas(user, espectaculo);
@@ -186,6 +214,7 @@ public class Main {
                 }
                 // entento de anular una entrada
                 case ENTRADAS_ANULAR_INTENTO -> {
+                    System.out.println("ENTRADAS_ANULAR_INTENTO");
                     User user = response.user;
                     Entrada entrada = response.entrada;
                     anularEntrada(user, entrada);
@@ -197,16 +226,19 @@ public class Main {
                 }
                 // accion de cerrar session
                 case LOGIN_CERRAR_SESSION -> {
+                    System.out.println("LOGIN_CERRAR_SESSION");
                     socket.send(new Response(LOGIN_CERRAR_SESSION_CORRECTO));
+                }
+                case APP_CERRAR -> {
                     sortir = true;
                 }
             }
-        } while (sortir);
+        } while (!sortir);
     }
     // Comprova si l'usuari que s'esta intentant crear existeix
     private static boolean checkNewUser(User user) {
         ArrayList<String> users = getUsers();
-        int i = 0;
+        int i = 1;
         boolean alreadyExists = false;
         while (i < users.size() && !alreadyExists) {
             if ( User.getUserFromCadena(users.get(i)).userName.equals(user.userName) ) {
@@ -282,7 +314,7 @@ public class Main {
         reader.start();
         line = reader.readLine(); line = reader.readLine();
         while ((line = reader.readLine()) != null) {
-            if (!line.contains(":L") && !line.contains(usuario.userName)) {
+            if (!line.contains(":L") && line.contains(usuario.userName)) {
                 sillas.add(line);
             }
         }
@@ -303,23 +335,25 @@ public class Main {
     // COmprova que les dades intrduides coincideixin amb les del administrador
     public static boolean checkAdmin(User usr) {
         String cadena = getAdmin();
+        String[] data = cadena.split(":");
         User admin = new User();
-        admin.userName = cadena.split(":")[1];
-        admin.password = cadena.split(":")[2];
-        return admin.equals(usr.userName) && BCrypt.checkpw(usr.password, admin.password);
+        admin.userName = data[1];
+        admin.password = data[2];
+        return admin.userName.equals(usr.userName) && BCrypt.checkpw(usr.password, admin.password);
     }
     // Comprova si hi ha un usuario amb el nom d'usuari introduit
     public static User checkUser(User user) {
         ArrayList<String> usuarios;
         usuarios = getUsers();
-        int i = 0;
+        int i = 1;
         boolean found = false;
         String s = "";
         while ( i < usuarios.size() && !found) {
             s = usuarios.get(i);
-            if (s.contains(user.name)) {
+            if (s.contains(user.userName)) {
                 found = true;
             }
+            i++;
         }
         User usr = null;
         if (found) {
@@ -353,8 +387,8 @@ public class Main {
     public static void añadirCliente(User usr) throws IOException {
         FileManager.Writer writer = FileManager.getWriter(FILE_USERS);
         ArrayList<String> filecontent = getUsers();
-        int newID = filecontent.size()+1;
-        filecontent.add(newID+":"+true+usr.getCadenaNewClient());
+        int newID = filecontent.size();
+        filecontent.add(usr.getCadenaNewClient());
         writer.start();
         writer.writeAll(filecontent);
         writer.close();
