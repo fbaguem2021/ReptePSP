@@ -24,7 +24,7 @@ public class Client {
                     "0- Cerrar sesión");
             do {
                 opcion = ReadM._int("Opcion: ");
-            } while (opcion < 0 || opcion > 2);
+            } while (opcion < 0 || opcion > 3);
 
             switch (opcion) {
                 case 1:

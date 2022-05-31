@@ -28,32 +28,44 @@ public class Main {
     public static final String FILE_ESPECTACLES =
             "src\\files"+ File.separator+"espectacles.txt";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        boolean err = false;
         int i = 0;
         while(true) {
             final MySocket socket = new MySocket(5000);
-            System.out.println("Esperando conexiones");
+            if (!err) {
+                System.out.println("Esperando conexiones");
+            } else {
+                System.out.println("recuperando conexión");
+                err = false;
+            }
             try {
                 socket.accept();
                 System.out.println(socket.getIP());
                 System.out.println("conexión iniciada");
+                //socket.close();
                 //lunchThread(socket);
                 lunchNormal(socket);
                 System.out.println(" - - - - - ");
             } catch (SocketException ex) {
-                ex.printStackTrace();
+                socket.close();
+                err = true;
+                //ex.printStackTrace();
             } catch (IOException e) {
                 System.out.println("Ha ocurrido un error");
             }
             i++;
         }
     }
-    public static void lunchNormal(MySocket socket) {
+    public static void lunchNormal(MySocket socket) throws SocketException {
         try {
             socketMenu(socket);
             socket.close();
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        } catch (SocketException exception) {
+            System.out.println("Ha ocurrido un error de conexión");
+            throw exception;
+        }catch (IOException | ClassNotFoundException ex) {
+            ex.printStackTrace();
         }
     }
     // metode que llença el thread amb una nova conexió
@@ -269,14 +281,19 @@ public class Main {
 
     private static void anularEntrada(User user, Entrada entrada) {
         ArrayList<String> file = getEspectaculoFile(entrada.espectaculo);
-
-        for (int i = 2; i < file.size(); i++) {
-            String silla = file.get(i);
-            if (silla.contains(entrada.fila+":"+entrada.columna) && silla.contains(user.name)) {
+        String sillaorigen = entrada.fila+":"+entrada.columna+":C:"+user.userName;
+        int i = 0;
+        boolean found = false;
+        String silla = "";
+        String line;
+        while ( i < file.size() && !found) {
+            line = file.get(i);
+            if (line.equals(sillaorigen)) {
                 silla = entrada.fila+":"+entrada.columna+":L";
-            }
+                found = true;
+            } else i++;
         }
-
+        file.set(i, silla);
         FileManager.Writer writer = FileManager.getWriter(FOLDER_ESPECTACLES+entrada.espectaculo+".txt");
         try {
             writer.start();
@@ -288,7 +305,7 @@ public class Main {
     }
 
     private static void reservarEntradas(User user, Entrada entrada) {
-        ArrayList<String> file = getEspectaculoFile(entrada.espectaculo);
+        /*ArrayList<String> file = getEspectaculoFile(entrada.espectaculo);
 
         for (int i = 2; i < file.size(); i++) {
             String silla = file.get(i);
@@ -297,6 +314,28 @@ public class Main {
             }
         }
 
+        FileManager.Writer writer = FileManager.getWriter(FOLDER_ESPECTACLES+entrada.espectaculo+".txt");
+        try {
+            writer.start();
+            writer.writeAll(file);
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }*/
+        ArrayList<String> file = getEspectaculoFile(entrada.espectaculo);
+        String sillaorigen = entrada.fila+":"+entrada.columna+":L";
+        int i = 0;
+        boolean found = false;
+        String silla = "";
+        String line;
+        while ( i < file.size() && !found) {
+            line = file.get(i);
+            if (line.equals(sillaorigen)) {
+                silla = entrada.fila+":"+entrada.columna+":C:"+user.userName;
+                found = true;
+            } else i++;
+        }
+        file.set(i, silla);
         FileManager.Writer writer = FileManager.getWriter(FOLDER_ESPECTACLES+entrada.espectaculo+".txt");
         try {
             writer.start();
