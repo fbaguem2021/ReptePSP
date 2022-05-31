@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import static com.example.application.models.Actions.*;
 
 public class Espectacles {
+    public static final void separador(){System.out.println("==================================================");}
     public static final String MODO_RESERVA = "RESERVA";
     public static final String MODO_ANULACION = "ANULACION";
     // menu per a la r3eserva y anulacio de entrades
@@ -30,6 +31,7 @@ public class Espectacles {
         }
     }
     private static String escogerEspectaculo(ArrayList<String> espectaculos) {
+        separador();
         System.out.println("Espectaculos:");
         for (int i = 0; i < espectaculos.size(); i++) System.out.println(i+"- "+espectaculos.get(i));
         int opcion = ReadM._int("Opcion: ");

@@ -11,10 +11,12 @@ import com.example.application.processes.UsuarioModificar;
 import java.io.IOException;
 
 public class Client {
+    public static final void separador(){System.out.println("==================================================");}
     public static void menu(MySocket socket, User user) {
         boolean sortir = false;
         int opcion;
         do {
+            separador();
             System.out.println("Que quieres hacer:\n  " +
                     "1- Comprar entradas\n  " +
                     "2- Devolver entradas\n  " +

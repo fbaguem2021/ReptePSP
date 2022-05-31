@@ -13,6 +13,7 @@ public class UsuarioCrear {
     // Metodo para crear un usuario
     public static User crear() {
         User user = new User();
+        user.active = true;
         user.name = nombre();
         user.surname = apellidos();
         user.userName = userName();
@@ -69,7 +70,7 @@ public class UsuarioCrear {
         String s = ReadM._String("Contraseña (min 8 letras): ");
 
         while (Objects.equals(s, "") || s.length() < 8) {
-            System.out.println("Deves introducir un ");
+            System.out.println("Deves introducir una contraseña");
             s = ReadM._String(" --> ");
         }
         return s;
@@ -94,7 +95,7 @@ public class UsuarioCrear {
     }
     // metodo para introducir la tarjeta de credito
     private static String tarjeta()     {
-        String s = ReadM._String("Tarjeta de credito");
+        String s = ReadM._String("Tarjeta de credito: ");
 
         while (s.equals("")) {
             System.out.println("Deves introducir una tarjeta de crediito");

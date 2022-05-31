@@ -3,6 +3,7 @@ package com.example.application.models;
 import java.io.Serializable;
 
 public enum Actions implements Serializable {
+    APP_CERRAR,
     LOGIN_ADMIN_INTENTO,
     LOGIN_ADMIN_CORRECTO,
     LOGIN_ADMIN_INCORRECTO,
