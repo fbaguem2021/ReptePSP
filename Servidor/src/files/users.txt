@@ -1,2 +1,2 @@
 0:administrador:$2a$10$0bffIbvFTG59G4FM41qcmep0fdxgyg5Lq0iqpvpFV1Vl2BqpSySpa
-1:true:fran:Francesc:Bague Marti:francesc.bague@gmail.com:$2a$10$mQjbqqiwuN72WfFi0YaZzOGxEaexa5CYf0/bAEK88ZHcfIuZszIg2:633576489::1
+1:false:fran:Francesc:Bague Marti:francesc.bague@gmail.com:$2a$10$mQjbqqiwuN72WfFi0YaZzOGxEaexa5CYf0/bAEK88ZHcfIuZszIg2:633576489:2

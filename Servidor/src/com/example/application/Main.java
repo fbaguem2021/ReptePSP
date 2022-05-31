@@ -530,10 +530,10 @@ public class Main {
         FileManager.Writer writer = FileManager.getWriter(FOLDER_ESPECTACLES+espectaculo+".txt");
         try {
             writer.start();
-            writer.writeLine(espectaculo);
+            writer.writeLine(espectaculo+"\n");
             for (int i = 1; i <= 10; i++) {
                 for (int j = 1; j <= 10; j++) {
-                    writer.writeLine(i+":"+j+":"+"L");
+                    writer.writeLine("\n"+i+":"+j+":"+"L");
                 }
             }
             writer.close();
