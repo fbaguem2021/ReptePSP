@@ -2,10 +2,13 @@ package com.example.application.models;
 
 import com.example.application.classes.Cripto;
 import com.example.application.classes.BCrypt;
+
+import java.io.Serializable;
+
 import static com.example.application.classes.Cripto.AES_hash;
 import static com.example.application.classes.Cripto.AES_unhash;
 
-public class User {
+public class User implements Serializable {
     public int id;
     public boolean active;
     public String  name;
@@ -52,6 +55,7 @@ public class User {
     }
     public User(String userName, String name, String surname, String email, String password,
                 String phone, String tarjetaCredito/*, boolean create*/) {
+        this.active         = true;
         this.userName       = userName;
         this.name           = name;
         this.surname        = surname;

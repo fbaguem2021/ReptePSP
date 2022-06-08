@@ -8,9 +8,12 @@ import java.io.IOException;
 import java.util.Scanner;
 
 public class UsuarioModificar {
+    public static final void separador(){System.out.println("==================================================");}
     static boolean modificaciones = false;
     static User moddedUser;
     public static User modificar(MySocket socket, User user) {
+        separador();
+        System.out.println("Deves introducir tu contraseña para accedxer a este menu");
         String contrasenia = ReadM._String("Contraseña: ");
         if (BCrypt.checkpw(contrasenia, user.password)) {
              menu(socket, user);
@@ -27,6 +30,7 @@ public class UsuarioModificar {
         moddedUser = user;
         boolean salir = false;
         do {
+            separador();
             System.out.println("Que quieres modificar?\n" +
                     "1- Nombre\n" +
                     "2- Apellidos\n" +

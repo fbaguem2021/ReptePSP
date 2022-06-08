@@ -32,6 +32,7 @@ public class Admin {
                     verEspectaculos(socket);
                     break;
                 case 0:
+                    separador();
                     sortir = true;
                     System.out.println("Saliendo");
                     break;
@@ -40,6 +41,7 @@ public class Admin {
     }
     private static void crearEspectaculo(MySocket socket) {
         try {
+            separador();
             String nombre = ReadM._String("Nombre: ");
             Response res = new Response();
             res.espectaculo = nombre;
@@ -58,6 +60,7 @@ public class Admin {
     }
     private static void verEspectaculos(MySocket socket) {
         try {
+            separador();
             socket.send((Object) new Response(ESPECTACULOS_OBTENER));
             Response res = (Response) socket.readObject();
             if (res.action == ESPECTACULOS_OBTENER_CORRECTO) {

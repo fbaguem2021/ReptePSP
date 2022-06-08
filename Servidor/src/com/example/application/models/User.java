@@ -2,10 +2,13 @@ package com.example.application.models;
 
 import com.example.application.classes.Cripto;
 import com.example.application.classes.BCrypt;
+
+import java.io.Serializable;
+
 import static com.example.application.classes.Cripto.AES_hash;
 import static com.example.application.classes.Cripto.AES_unhash;
 
-public class User {
+public class User implements Serializable {
     public int id;
     public boolean active;
     public String  name;
@@ -29,16 +32,15 @@ public class User {
     }
     public static User getUserFromCadena(String cadena) {
         User user = new User();
-        int i = -1;
-        user.id = Integer.parseInt(cadena.split(":")[i++]);
-        user.active = Boolean.getBoolean(cadena.split(":")[i++]);
-        user.userName = cadena.split(":")[i++];
-        user.name = cadena.split(":")[i++];
-        user.surname = cadena.split(":")[i++];
-        user.email = cadena.split(":")[i++];
-        user.password = cadena.split(":")[i++];
-        user.phone = cadena.split(":")[i++];
-        user.tarjetaCredito = cadena.split(":")[i++];
+        user.id = Integer.parseInt(cadena.split(":")[0]);
+        user.active = Boolean.getBoolean(cadena.split(":")[1]);
+        user.userName = cadena.split(":")[2];
+        user.name = cadena.split(":")[3];
+        user.surname = cadena.split(":")[4];
+        user.email = cadena.split(":")[5];
+        user.password = cadena.split(":")[6];
+        user.phone = cadena.split(":")[7];
+        user.tarjetaCredito = cadena.split(":")[8];
 
         return user;
     }
@@ -64,7 +66,7 @@ public class User {
         return userName+':'+password;
     }
     public String getCadenaNewClient() {
-        return id+":"+active+":"+userName+":"+name+":"+surname+":"+email+":"+password+":"+phone+":"+":"+tarjetaCredito;
+        return id+":"+active+":"+userName+":"+name+":"+surname+":"+email+":"+password+":"+phone+":"+tarjetaCredito;
     }
     public String getCadenaModClient() {
         return id+":"+active+":"+userName+":"+name+":"+surname+":"+email+":"+password+":"+phone+":"+tarjetaCredito;
