@@ -12,13 +12,15 @@ import java.util.ArrayList;
 import static com.example.application.models.Actions.*;
 
 public class EntradasComprar {
+    public static final void separador(){System.out.println("==================================================");}
     protected static void comprar(MySocket socket, User user, String espectacle){
         try {
             Response res = new Response();
-            res.action = ENTRADAS_ANULAR_MOSTRAR_DISPONIBLES;
+            res.user = user;
+            res.action = ENTRADAS_RESERVAR_MOSTRAR_DISPONIBLES;
             res.espectaculo = espectacle;
             socket.send((Object) res);
-
+            separador();
             Response respuesta = (Response) socket.readObject();
             int[] silla = escogerSilla(respuesta.sillas);
             if (comprovarSilla(respuesta.sillas, silla)) {
@@ -63,11 +65,11 @@ public class EntradasComprar {
             System.out.println("Estas sillas estan ocupadas: ");
             sillas.forEach(System.out::println);
         }
-        silla[0] = ReadM._int("Fila: (1 a 10");
+        silla[0] = ReadM._int("Fila: (1 a 10): ");
         while (silla[0]< 0 || silla[0] > 10) {
             silla[0] = ReadM._int(" --> ");
         }
-        silla[1] = ReadM._int("Columna: (1 a 10");
+        silla[1] = ReadM._int("Columna: (1 a 10): ");
         while (silla[1]< 0 || silla[1] > 10) {
             silla[1] = ReadM._int(" --> ");
         }

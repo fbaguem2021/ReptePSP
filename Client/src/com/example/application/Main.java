@@ -20,9 +20,8 @@ public class Main {
 
     public static final void separador(){System.out.println("==================================================");}
     public static void main(String[] args) {
-        final String IP = ReadM._String("IP del servidor: ");
-        final int PORT  = ReadM._int("Puerto (de 5000 a arriva): ");
-
+        final String IP = "192.168.50.69";//ReadM._String("IP del servidor: ");
+        final int PORT  = 5000;//ReadM._int("Puerto: ");
         MySocket socket = new MySocket(IP, PORT);
         try {
             socket.start();
@@ -55,16 +54,26 @@ public class Main {
                     break;
                 case 0:
                     salir = true;
+                    cerrarAplicacion(socket);
                     System.out.println("Saliendo");
                     break;
             }
 
         } while (!salir);
+    }
 
+    private static void cerrarAplicacion(MySocket socket) {
+        try {
+            socket.send((Object) new Response(APP_CERRAR));
+            socket.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void crearUsuario(MySocket socket) {
         try {
+            separador();
             User usuario = UsuarioCrear.crear();
             Response res = new Response();
             res.action = USUARIO_ALTA_INTENTO;
@@ -88,13 +97,14 @@ public class Main {
             Response response = new Response();
             Response resultado;
             String username = ReadM._String("Nombre de usuario: ");
-            String contrasena = ReadM._String("Contraseña");
+            String contrasena = ReadM._String("Contraseña: ");
             if (username.equals("administrador")) {
                 response.action = LOGIN_ADMIN_INTENTO;
             } else {
                 response.action = LOGIN_CLIENTE_INTENTO;
             }
             response.user = new User(username, contrasena);
+            //response.user = new User("administrador", "a");
             socket.send((Object) response);
             resultado = (Response) socket.readObject();
 

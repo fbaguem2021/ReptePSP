@@ -15,6 +15,7 @@ public class EntradasAnular {
     protected static void anular(MySocket socket, User user, String espectaculo) {
         try {
             Response res = new Response(ENTRADAS_ANULAR_MOSTRAR_DISPONIBLES);
+            res.user = user;
             res.espectaculo = espectaculo;
             socket.send((Response) res);
             Response respuesta = (Response) socket.readObject();

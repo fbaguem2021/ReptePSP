@@ -235,8 +235,15 @@ public abstract class FileManager {
         public void writeAll(ArrayList<String> lines) throws IOException {
             if (this.hasBeenStarted) {
                 try {
+                    int i = 1;
                     for (String line : lines)
-                        this.writer.write(line);
+                        if (i != lines.size()) {
+                            this.writer.write(line+"\n");
+                            i++;
+                        } else {
+                            this.writer.write(line);
+                        }
+
                 } catch (IOException ex) {
                     throw new IOException(ex);
                 }
