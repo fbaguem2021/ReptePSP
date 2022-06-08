@@ -18,6 +18,10 @@
 *.tar.gz
 *.rar
 
+# VSCode files
+/.vscode/
+*/.vscode/
+
 # JetBrains files
 Servidor/.idea
 Client/.idea
