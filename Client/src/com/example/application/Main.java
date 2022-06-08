@@ -10,6 +10,7 @@ import com.example.application.models.*;
 import com.example.application.processes.UsuarioCrear;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 
 
 /**
@@ -20,11 +21,27 @@ public class Main {
 
     public static final void separador(){System.out.println("==================================================");}
     public static void main(String[] args) {
-        final String IP = "192.168.50.69";//ReadM._String("IP del servidor: ");
+        String IP = ReadM._String("IP del servidor: ");
         final int PORT  = 5000;//ReadM._int("Puerto: ");
-        MySocket socket = new MySocket(IP, PORT);
+        int i = 0;
+        boolean porterr;
         try {
-            socket.start();
+            MySocket socket = new MySocket(IP, PORT+i);
+            do {
+                porterr = false;
+                try {
+                    socket.start();
+                } catch (UnknownHostException ex) {
+                    System.out.println("Ip no encontrada. Introduce otra direccion ip");
+                    IP = ReadM._String("IP: ");
+                    socket = new MySocket(IP, PORT+i);
+                } catch (Exception ex) {
+                    i++;
+                    porterr = true;
+                    socket = new MySocket(IP, PORT+i);
+                }
+                
+            } while (porterr);
             menuInicial(socket);
             socket.close();
         } catch (IOException e) {

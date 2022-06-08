@@ -22,17 +22,18 @@ import java.util.ArrayList;
 public class Main {
     public static final void separador(){System.out.println("==================================================");}
     public static final String FOLDER_ESPECTACLES =
-            "src\\files"+ File.separator+"performances"+File.separator;
+            "src"+ File.separator+"files"+ File.separator+"performances"+File.separator;
     public static final String FILE_USERS =
-            "src\\files"+ File.separator+"users.txt";
+            "src"+ File.separator+"files"+ File.separator+"users.txt";
     public static final String FILE_ESPECTACLES =
-            "src\\files"+ File.separator+"espectacles.txt";
+            "src"+ File.separator+"files"+ File.separator+"espectacles.txt";
 
     public static void main(String[] args) throws IOException {
         boolean err = false;
-        int i = 0;
+        boolean porterr = false;
         while(true) {
-            final MySocket socket = new MySocket(5000);
+            int i = 0;
+            MySocket socket = new MySocket(5000);
             if (!err) {
                 System.out.println("Esperando conexiones");
             } else {
@@ -40,12 +41,22 @@ public class Main {
                 err = false;
             }
             try {
-                socket.accept();
+                do {
+                    porterr = false;
+                    try {
+                        socket.accept();
+                    } catch (Exception e) {
+                        i++;
+                        socket = new MySocket(5000+i);
+                        porterr = true;
+                    }
+                } while (porterr);
+
                 System.out.println(socket.getIP());
                 System.out.println("conexión iniciada");
                 //socket.close();
-                //lunchThread(socket);
-                lunchNormal(socket);
+                lunchThread(socket);
+                //lunchNormal(socket);
                 System.out.println(" - - - - - ");
             } catch (SocketException ex) {
                 socket.close();
@@ -54,7 +65,6 @@ public class Main {
             } catch (IOException e) {
                 System.out.println("Ha ocurrido un error");
             }
-            i++;
         }
     }
     public static void lunchNormal(MySocket socket) throws SocketException {
@@ -64,20 +74,25 @@ public class Main {
         } catch (SocketException exception) {
             System.out.println("Ha ocurrido un error de conexión");
             throw exception;
-        }catch (IOException | ClassNotFoundException ex) {
+        } catch (IOException | ClassNotFoundException ex) {
             ex.printStackTrace();
         }
     }
     // metode que llença el thread amb una nova conexió
     public static void lunchThread(MySocket socket) {
-        new MyThread().startThread( () -> {
-            try {
-                socketMenu(socket);
-                socket.close();
-            } catch (IOException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        try {
+            new MyThread().startThread( () -> {
+                try {
+                    socketMenu(socket);
+                    socket.close();
+                } catch (IOException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (Exception ex) {
+            System.out.println("ha ocurrido un error de conexión");
+            throw ex;
+        }
     }
     // Metode que funciona de menu y que mitgançant un switch i una classe enum,
     // detecta quina es l'accio que realitza l'usuari
