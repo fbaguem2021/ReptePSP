@@ -1,19 +1,22 @@
 package com.example.application;
 
-import com.example.application.classes.*;
 import static com.example.application.models.Actions.*;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.concurrent.Executor;
+
+import com.example.application.classes.BCrypt;
+import com.example.application.classes.CustomRunnable;
+import com.example.application.classes.FileManager;
+import com.example.application.classes.MySocket;
+import com.example.application.classes.MyThread;
 import com.example.application.models.Entrada;
 import com.example.application.models.Response;
 import com.example.application.models.User;
-
-import java.io.File;
-
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.SocketException;
-import java.util.ArrayList;
 
 /**
  * Servidor
@@ -28,51 +31,73 @@ public class Main {
     public static final String FILE_ESPECTACLES =
             "src"+ File.separator+"files"+ File.separator+"espectacles.txt";
 
+    public static MySocket socket;
     public static void main(String[] args) throws IOException {
-        boolean err = false;
-        boolean porterr = false;
-        while(true) {
-            int i = 0;
-            MySocket socket = new MySocket(5000);
-            if (!err) {
-                System.out.println("Esperando conexiones");
-            } else {
-                System.out.println("recuperando conexión");
-                err = false;
-            }
+        CustomRunnable runnable = new CustomRunnable(socket);
+        Thread thread = new Thread(runnable);
+        //MyThread myThread = new MyThread(runnable);
+        //ServerSocket server = new ServerSocket(5000);
+        socket = new MySocket(new ServerSocket(5000));
+        int i = 0;
+        while (i < 2) {
             try {
-                do {
-                    porterr = false;
-                    try {
-                        socket.accept();
-                    } catch (Exception e) {
-                        i++;
-                        socket = new MySocket(5000+i);
-                        porterr = true;
-                    }
-                } while (porterr);
-
-                System.out.println(socket.getIP());
-                System.out.println("conexión iniciada");
-                //socket.close();
-                lunchThread(socket);
-                //lunchNormal(socket);
-                System.out.println(" - - - - - ");
-            } catch (Exception ex) {
-                System.out.println("Ha ocurrido un error");
-                socket.close();
-                err = true;
+                thread = new Thread(runnable);
+                socket.accept();
+                System.out.println("Cliente conectado    -> IP: "+socket.getIP());
+                thread.start();
+            } catch (RuntimeException ex) {
+                ex.printStackTrace(); 
+            } catch (IOException ex) {
                 ex.printStackTrace();
             }
+            i++;
         }
+        // boolean err = false;
+        // boolean porterr = false;
+        // while(true) {
+        //     int i = 0;
+        //     MySocket socket = new MySocket(5000);
+        //     if (!err) {
+        //         System.out.println("Esperando conexiones");
+        //     } else {
+        //         System.out.println("recuperando conexión");
+        //         err = false;
+        //     }
+        //     try {
+        //         do {
+        //             porterr = false;
+        //             try {
+        //                 socket.accept();
+        //             } catch (Exception e) {
+        //                 i++;
+        //                 socket = new MySocket(5000+i);
+        //                 porterr = true;
+        //             }
+        //         } while (porterr);
+
+        //         System.out.println(socket.getIP());
+        //         System.out.println("conexión iniciada");
+        //         //socket.close();
+        //         lunchThread(socket);
+        //         //lunchNormal(socket);
+        //         System.out.println(" - - - - - ");
+        //     } catch (Exception ex) {
+        //         System.out.println("Ha ocurrido un error");
+        //         socket.close();
+        //         err = true;
+        //         ex.printStackTrace();
+        //     }
+        // }
+
     }
+    
     public static void lunchNormal(MySocket socket) throws SocketException {
         try {
             socketMenu(socket);
             socket.close();
         } catch (SocketException exception) {
             System.out.println("Ha ocurrido un error de conexión");
-            throw exception;
+            exception.printStackTrace();
         } catch (IOException | ClassNotFoundException ex) {
             ex.printStackTrace();
         }
@@ -87,13 +112,13 @@ public class Main {
                         socketMenu(socket);
                         socket.close();
                     } catch (IOException | ClassNotFoundException e) {
-                        throw new RuntimeException(e);
+                        e.printStackTrace();
                     }
                 }
             });
         } catch (Exception ex) {
             System.out.println("ha ocurrido un error de conexión");
-            throw ex;
+            ex.printStackTrace();
         }
     }
     // Metode que funciona de menu y que mitgançant un switch i una classe enum,
@@ -118,7 +143,7 @@ public class Main {
                     } else {
                         socket.send((Object) new Response(LOGIN_ADMIN_INCORRECTO, "Inicio de session incorrecto"));
                     }
-                    break;
+                break;
                 //clioente intentando hacer login
                 case LOGIN_CLIENTE_INTENTO:
                     System.out.println("LOGIN_CLIENTE_INTENTO");
@@ -136,11 +161,12 @@ public class Main {
                 // intento de alta de un usuario
                 case USUARIO_ALTA_INTENTO:
                     System.out.println("USUARIO_ALTA_INTENTO");
+                    usuario = response.user;
                     try {
-                        if (checkNewUser(response.user)) {
+                        if (checkNewUser(usuario)) {
                             socket.send((Object) new Response(USUARIO_ALTA_INCORRECTO, "Ya existe el nombre de usuario"));
                         } else {
-                            añadirCliente(response.user);
+                            añadirCliente(usuario);
                             socket.send((Object) new Response(USUARIO_ALTA_CORRECTO, "Usuario añadido correctamente"));
                         }
                     } catch (IOException ex) {
@@ -264,7 +290,12 @@ public class Main {
                     socket.send(new Response(LOGIN_CERRAR_SESSION_CORRECTO));
                 break;
                 case APP_CERRAR:
+                    System.out.println("Cliente desconectado -> IP: "+socket.getIP());
                     sortir = true;
+                break;
+                default:
+                    System.err.println("ERROR DE CONEXIÓHN   -> IP: "+socket.getIP());
+                    separador();
                 break;
             }
         } while (!sortir);
@@ -364,6 +395,7 @@ public class Main {
         }
         return sillas;
     }
+
     private static ArrayList<String> getEspectaculoFile(String espectaculo) {
         ArrayList<String> file = new ArrayList<>();
         FileManager.Reader reader = FileManager.getReader(FOLDER_ESPECTACLES+espectaculo+".txt");
@@ -405,6 +437,7 @@ public class Main {
         }
         return usr;
     }
+
     public static boolean checkEspectaculo(String espectaculo) {
         boolean exists = false;
         for (String s : getEspectaculos()) {
@@ -432,6 +465,7 @@ public class Main {
         FileManager.Writer writer = FileManager.getWriter(FILE_USERS);
         ArrayList<String> filecontent = getUsers();
         int newID = filecontent.size();
+        usr.id = newID;
         filecontent.add(usr.getCadenaNewClient());
         writer.start();
         writer.writeAll(filecontent);
@@ -502,6 +536,7 @@ public class Main {
         }
         return filecontent;
     }
+
     public static void crearEspectaculo(String espectaculo) {
         ArrayList<String> espectaculos = getEspectaculos();
         espectaculos.add(espectaculo);
@@ -554,4 +589,5 @@ public class Main {
                 vals[6]+":"+vals[7]+":"+
                 vals[8]+":"+vals[9];
     }
+    
 }
