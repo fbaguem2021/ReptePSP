@@ -22,26 +22,26 @@ public class Main {
     public static final void separador(){System.out.println("==================================================");}
     public static void main(String[] args) {
         String IP = ReadM._String("IP del servidor: ");
-        final int PORT  = 5000;//ReadM._int("Puerto: ");
-        int i = 0;
-        boolean porterr;
+        int PORT  = ReadM._int("Puerto: ");
+        MySocket socket;
+        boolean err = false;
         try {
-            MySocket socket = new MySocket(IP, PORT+i);
+
             do {
-                porterr = false;
+                socket = new MySocket(IP, PORT);
                 try {
                     socket.start();
                 } catch (UnknownHostException ex) {
-                    System.out.println("Ip no encontrada. Introduce otra direccion ip");
+                    System.out.println("Información de conexión erronea. Vuelve a introducir");
+                    err = true;
                     IP = ReadM._String("IP: ");
-                    socket = new MySocket(IP, PORT+i);
-                } catch (Exception ex) {
-                    i++;
-                    porterr = true;
-                    socket = new MySocket(IP, PORT+i);
+                    PORT=ReadM._int("Puerto: ");
                 }
-                
-            } while (porterr);
+
+            } while (err);
+
+            //socket.start();  
+
             menuInicial(socket);
             socket.close();
         } catch (IOException e) {

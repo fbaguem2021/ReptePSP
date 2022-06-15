@@ -28,6 +28,7 @@ public class MySocket {
     private ServerSocket serverSocket;
     private Socket socket;
     private boolean isClient;
+    private boolean multiClient;
     
     //region CONSTRUCTORS
     public MySocket(){
@@ -42,6 +43,7 @@ public class MySocket {
         this.ip = ip;
         this.port = port;
         this.isClient = true;
+        this.multiClient = false;
     }
     /**
      * Constructor for a server's socket
@@ -50,6 +52,7 @@ public class MySocket {
     public MySocket(ServerSocket serverSocket) {
         this.serverSocket = serverSocket;
         this.isClient = false;
+        this.multiClient = true;
     }
     /**
      * Constructor for a server's socket
@@ -77,9 +80,12 @@ public class MySocket {
      * @throws IOException Throws an Exception
      */
     public void accept() throws IOException {
+
         if (isClient)
             throw new IOException("Este mètodo solo funciona si el socket es un servidor.");
-        else {
+        else if (multiClient) {
+            this.socket = serverSocket.accept();
+        } else {
             this.serverSocket = new ServerSocket(this.port);
             this.socket = serverSocket.accept();
         }
@@ -330,23 +336,23 @@ public class MySocket {
      * @throws IOException Throws an Exception
      * @throws ClassNotFoundException Throws an Exception
      */
-//    public byte[] readBytes(int length) throws IOException, ClassNotFoundException {
-//        InputStream is = this.socket.getInputStream();
-//        ObjectInputStream ois = new ObjectInputStream(is);
-//        return ois.readNBytes(length);
-//    }
+    public byte[] readBytes(int length) throws IOException, ClassNotFoundException {
+        InputStream is = this.socket.getInputStream();
+        ObjectInputStream ois = new ObjectInputStream(is);
+        return ois.readNBytes(length);
+    }
     /**
      * Method that reads an <b>array of bytes</b>
      * @return Returns a byte array
      * @throws IOException Throws an Exception
      * @throws ClassNotFoundException Throws an Exception
      */
-//    public byte[] readBytes() throws IOException, ClassNotFoundException {
-//        int length = this.readInt();
-//        InputStream is = this.socket.getInputStream();
-//        ObjectInputStream ois = new ObjectInputStream(is);
-//        return ois.readNBytes(length);
-//    }
+    public byte[] readBytes() throws IOException, ClassNotFoundException {
+        int length = this.readInt();
+        InputStream is = this.socket.getInputStream();
+        ObjectInputStream ois = new ObjectInputStream(is);
+        return ois.readNBytes(length);
+    }
     //endregion
 
     //region FILES

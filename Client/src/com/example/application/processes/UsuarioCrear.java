@@ -1,5 +1,6 @@
 package com.example.application.processes;
 
+import com.example.application.classes.BCrypt;
 import com.example.application.classes.ReadM;
 import com.example.application.models.User;
 
@@ -67,13 +68,13 @@ public class UsuarioCrear {
     }
     // metodo para introducir la contraseña
     private static String password()    {
-        String s = ReadM._String("Contraseña (min 8 letras): ");
+        String password = ReadM._String("Contraseña (min 8 letras): ");
 
-        while (Objects.equals(s, "") || s.length() < 8) {
+        while (Objects.equals(password, "") || password.length() < 8) {
             System.out.println("Deves introducir una contraseña");
-            s = ReadM._String(" --> ");
+            password = ReadM._String(" --> ");
         }
-        return s;
+        return BCrypt.hashpw(password, BCrypt.gensalt(10));
     }
     // metodo para introducir el numero de telefono
     private static String phone() {
