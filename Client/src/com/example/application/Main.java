@@ -14,38 +14,39 @@ import java.net.UnknownHostException;
 
 
 /**
- *
- * @author francesc
+ * Client
+ * @author Francesc Bagué Martí
  */
 public class Main {
 
     public static final void separador(){System.out.println("==================================================");}
     public static void main(String[] args) {
         String IP = ReadM._String("IP del servidor: ");
-        final int PORT  = 5000;//ReadM._int("Puerto: ");
-        int i = 0;
-        boolean porterr;
+        int PORT  = ReadM._int("Puerto: ");
+        MySocket socket;
+        boolean err = false;
         try {
-            MySocket socket = new MySocket(IP, PORT+i);
+
             do {
-                porterr = false;
+                err = false;
+                socket = new MySocket(IP, PORT);
                 try {
                     socket.start();
                 } catch (UnknownHostException ex) {
-                    System.out.println("Ip no encontrada. Introduce otra direccion ip");
+                    System.out.println("Información de conexión erronea. Vuelve a introducir");
+                    err = true;
                     IP = ReadM._String("IP: ");
-                    socket = new MySocket(IP, PORT+i);
-                } catch (Exception ex) {
-                    i++;
-                    porterr = true;
-                    socket = new MySocket(IP, PORT+i);
+                    PORT=ReadM._int("Puerto: ");
                 }
-                
-            } while (porterr);
+
+            } while (err);
+
+            //socket.start();  
+
             menuInicial(socket);
             socket.close();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
     public static void menuInicial(MySocket socket) {
@@ -84,7 +85,7 @@ public class Main {
             socket.send((Object) new Response(APP_CERRAR));
             socket.close();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
@@ -104,6 +105,7 @@ public class Main {
             }
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Ha ocurrido un error mientras se intentava añadir el usuario");
+			e.printStackTrace();
         }
 
     }
@@ -126,21 +128,22 @@ public class Main {
             resultado = (Response) socket.readObject();
 
             switch (resultado.action) {
-                case LOGIN_ADMIN_CORRECTO -> {
+                case LOGIN_ADMIN_CORRECTO:
                     System.out.println("Inicio de sesion de administrador correcto");
                     Admin.menu(socket, resultado.user);
-                }
-                case LOGIN_ADMIN_INCORRECTO, LOGIN_CLIENTE_INCORRECTO -> {
+                    break;
+                case LOGIN_ADMIN_INCORRECTO:
+                case LOGIN_CLIENTE_INCORRECTO:
                     System.out.println("Usuario, i/o contraseña incorrectos. Regresando al menu principal");
-                }
-                case LOGIN_CLIENTE_CORRECTO -> {
+                    break;
+                case LOGIN_CLIENTE_CORRECTO:
                     System.out.println("Inicio de sesion de cliente correcto");
                     Client.menu(socket, resultado.user);
-                }
+                break;
             }
 
         } catch (IOException | ClassNotFoundException e) {
-            System.out.println(e.toString());
+            e.printStackTrace();
         }
     }
 }

@@ -5,10 +5,13 @@
 package com.example.application.classes;
 
 public class MyThread extends Thread {
+    private Thread thread;
     private setOnThreadRun onThreadRun;
     private setOnThreadRunArgs onThreadRunArgs;
     public MyThread(){}
-    
+    public MyThread(Runnable runnable) {
+        this.thread = new Thread(runnable);
+    }
     public void run() {
         if (onThreadRun != null){
             onThreadRun.onThread();
@@ -22,7 +25,9 @@ public class MyThread extends Thread {
             }
         }
     }
-    
+    public void start(){
+        this.thread.start();
+    }
     public void startThread(setOnThreadRun onThreadRun) {
         this.onThreadRun = onThreadRun;
         this.start();

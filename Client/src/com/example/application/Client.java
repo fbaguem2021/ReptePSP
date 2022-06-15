@@ -2,13 +2,10 @@ package com.example.application;
 
 import com.example.application.classes.MySocket;
 import com.example.application.classes.ReadM;
-import static com.example.application.models.Actions.*;
-import com.example.application.models.Response;
 import com.example.application.models.User;
 import com.example.application.processes.Espectacles;
 import com.example.application.processes.UsuarioModificar;
 
-import java.io.IOException;
 
 public class Client {
     public static final void separador(){System.out.println("==================================================");}
