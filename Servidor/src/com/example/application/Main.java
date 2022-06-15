@@ -25,11 +25,11 @@ import com.example.application.models.User;
 public class Main {
     public static final void separador(){System.out.println("==================================================");}
     public static final String FOLDER_ESPECTACLES =
-            "src"+ File.separator+"files"+ File.separator+"performances"+File.separator;
+            "files"+ File.separator+"performances"+File.separator;
     public static final String FILE_USERS =
-            "src"+ File.separator+"files"+ File.separator+"users.txt";
+            "files"+ File.separator+"users.txt";
     public static final String FILE_ESPECTACLES =
-            "src"+ File.separator+"files"+ File.separator+"espectacles.txt";
+            "files"+ File.separator+"espectacles.txt";
 
     public static MySocket socket;
     public static void main(String[] args) throws IOException {
@@ -291,6 +291,7 @@ public class Main {
                 break;
                 case APP_CERRAR:
                     System.out.println("Cliente desconectado -> IP: "+socket.getIP());
+                    separador();
                     sortir = true;
                 break;
                 default:

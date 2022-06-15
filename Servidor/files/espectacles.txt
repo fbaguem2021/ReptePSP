@@ -1,1 +1,2 @@
-prova_espectacle.txt
+prova_espectacle
+nuevo_espectaculo

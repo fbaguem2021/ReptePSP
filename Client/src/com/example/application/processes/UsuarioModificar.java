@@ -86,7 +86,7 @@ public class UsuarioModificar {
                 System.out.println("Los canvios no se han realizado correctamente");
             }
         } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
     private static void name(User user) {
