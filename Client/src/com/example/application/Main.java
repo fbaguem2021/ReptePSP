@@ -28,6 +28,7 @@ public class Main {
         try {
 
             do {
+                err = false;
                 socket = new MySocket(IP, PORT);
                 try {
                     socket.start();

@@ -35,13 +35,15 @@ public class Main {
     public static void main(String[] args) throws IOException {
         CustomRunnable runnable = new CustomRunnable(socket);
         Thread thread = new Thread(runnable);
+        //MyThread myThread = new MyThread(runnable);
         //ServerSocket server = new ServerSocket(5000);
         socket = new MySocket(new ServerSocket(5000));
         int i = 0;
         while (i < 2) {
             try {
+                thread = new Thread(runnable);
                 socket.accept();
-                System.out.println("Cliente conectado -> IP: "+socket.getIP());
+                System.out.println("Cliente conectado    -> IP: "+socket.getIP());
                 thread.start();
             } catch (RuntimeException ex) {
                 ex.printStackTrace(); 
@@ -95,7 +97,7 @@ public class Main {
             socket.close();
         } catch (SocketException exception) {
             System.out.println("Ha ocurrido un error de conexión");
-            throw exception;
+            exception.printStackTrace();
         } catch (IOException | ClassNotFoundException ex) {
             ex.printStackTrace();
         }
@@ -110,13 +112,13 @@ public class Main {
                         socketMenu(socket);
                         socket.close();
                     } catch (IOException | ClassNotFoundException e) {
-                        throw new RuntimeException(e);
+                        e.printStackTrace();
                     }
                 }
             });
         } catch (Exception ex) {
             System.out.println("ha ocurrido un error de conexión");
-            throw ex;
+            ex.printStackTrace();
         }
     }
     // Metode que funciona de menu y que mitgançant un switch i una classe enum,
@@ -288,10 +290,12 @@ public class Main {
                     socket.send(new Response(LOGIN_CERRAR_SESSION_CORRECTO));
                 break;
                 case APP_CERRAR:
+                    System.out.println("Cliente desconectado -> IP: "+socket.getIP());
                     sortir = true;
                 break;
                 default:
-                    System.err.println("ERROR DE CONEXIÓHN -> IP: "+socket.getIP());
+                    System.err.println("ERROR DE CONEXIÓHN   -> IP: "+socket.getIP());
+                    separador();
                 break;
             }
         } while (!sortir);
