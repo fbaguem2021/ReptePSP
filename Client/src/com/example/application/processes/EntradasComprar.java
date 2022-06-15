@@ -42,6 +42,7 @@ public class EntradasComprar {
 
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Ha ocurrido un error durante el proceso");
+			e.printStackTrace();
         }
     }
 

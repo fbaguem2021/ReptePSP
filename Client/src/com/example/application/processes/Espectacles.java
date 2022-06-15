@@ -19,15 +19,15 @@ public class Espectacles {
             Response res = (Response) socket.readObject();
             String espectaculo = escogerEspectaculo(res.espectaculos);
             switch (mode) {
-                case MODO_RESERVA -> {
+                case MODO_RESERVA:
                     EntradasComprar.comprar(socket, user, espectaculo);
-                }
-                case MODO_ANULACION -> {
+                    break;
+                case MODO_ANULACION:
                     EntradasAnular.anular(socket, user, espectaculo);
-                }
+                    break;
             }
         } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
     private static String escogerEspectaculo(ArrayList<String> espectaculos) {

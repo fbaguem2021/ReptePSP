@@ -330,23 +330,23 @@ public class MySocket {
      * @throws IOException Throws an Exception
      * @throws ClassNotFoundException Throws an Exception
      */
-    public byte[] readBytes(int length) throws IOException, ClassNotFoundException {
-        InputStream is = this.socket.getInputStream();
-        ObjectInputStream ois = new ObjectInputStream(is);
-        return ois.readNBytes(length);
-    }
+//    public byte[] readBytes(int length) throws IOException, ClassNotFoundException {
+//        InputStream is = this.socket.getInputStream();
+//        ObjectInputStream ois = new ObjectInputStream(is);
+//        return ois.readNBytes(length);
+//    }
     /**
      * Method that reads an <b>array of bytes</b>
      * @return Returns a byte array
      * @throws IOException Throws an Exception
      * @throws ClassNotFoundException Throws an Exception
      */
-    public byte[] readBytes() throws IOException, ClassNotFoundException {
-        int length = this.readInt();
-        InputStream is = this.socket.getInputStream();
-        ObjectInputStream ois = new ObjectInputStream(is);
-        return ois.readNBytes(length);
-    }
+//    public byte[] readBytes() throws IOException, ClassNotFoundException {
+//        int length = this.readInt();
+//        InputStream is = this.socket.getInputStream();
+//        ObjectInputStream ois = new ObjectInputStream(is);
+//        return ois.readNBytes(length);
+//    }
     //endregion
 
     //region FILES

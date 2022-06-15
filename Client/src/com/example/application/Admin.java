@@ -56,6 +56,7 @@ public class Admin {
             }
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Ha ocurrido un error");
+			e.printStackTrace();
         }
     }
     private static void verEspectaculos(MySocket socket) {
@@ -69,7 +70,7 @@ public class Admin {
                 System.out.println("Ha ocurrido un error mientras se intentava obtener los espectaculos");
             }
         } catch (IOException | ClassNotFoundException ex) {
-            System.out.println("Ha ocurrido un error inesperado");
+            ex.printStackTrace();
         }
     }
 }
